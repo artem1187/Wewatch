@@ -11,5 +11,6 @@ data class FilmEntity(
     val year: String,
     val posterUrl: String,
     val genre: String? = null,
-    val isSelected: Boolean = false
+    val isSelected: Boolean = false,
+    val imdbId: String? = null
 )

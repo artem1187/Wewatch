@@ -42,7 +42,9 @@ class AddViewModel(
                     title = film.Title,
                     year = film.Year,
                     posterUrl = film.Poster,
-                    genre = film.Genre
+                    genre = film.Genre,
+                    imdbId = film.imdbID,
+                    isSelected = false
                 )
                 repository.insertFilm(filmEntity)
                 clearSelection()
