@@ -2,52 +2,68 @@ package com.example.wewatch.data.remote
 
 import com.google.gson.annotations.SerializedName
 
-/**
- * Модель ответа от API при поиске фильмов
- * API возвращает JSON, который Gson преобразует в этот класс
- */
 data class OmdbSearchResponse(
-    @SerializedName("Search")        // Указываем точное имя поля в JSON
-    val Search: List<OmdbFilm>?,      // Список найденных фильмов
+    @SerializedName("Search")
+    val Search: List<OmdbFilm>?,
     @SerializedName("totalResults")
-    val totalResults: String,          // Общее количество результатов
+    val totalResults: String,
     @SerializedName("Response")
-    val Response: String               // Статус ответа (True/False)
+    val Response: String
 )
 
-/**
- * Модель фильма из результатов поиска
- */
 data class OmdbFilm(
-    @SerializedName("Title")
-    val Title: String,                 // Название фильма
-    @SerializedName("Year")
-    val Year: String,                   // Год выпуска
-    @SerializedName("imdbID")
-    val imdbID: String,                 // Уникальный ID фильма на IMDB
-    @SerializedName("Type")
-    val Type: String,                   // Тип (movie, series, episode)
-    @SerializedName("Poster")
-    val Poster: String,                  // URL постера
-    @SerializedName("Genre")             // Жанр (может отсутствовать в поиске)
-    val Genre: String? = null            // Делаем опциональным
+    val Title: String,
+    val Year: String,
+    val imdbID: String,
+    val Type: String,
+    val Poster: String,
+    val Genre: String? = null
 )
 
 /**
- * Модель для получения детальной информации о фильме
- * Используется, когда нужно получить жанр
+ * Детальная информация о фильме
  */
 data class OmdbFilmDetails(
     @SerializedName("Title")
     val Title: String,
     @SerializedName("Year")
     val Year: String,
+    @SerializedName("Rated")
+    val Rated: String,
+    @SerializedName("Released")
+    val Released: String,
+    @SerializedName("Runtime")
+    val Runtime: String,
     @SerializedName("Genre")
-    val Genre: String,                    // Здесь жанр точно есть
+    val Genre: String,
+    @SerializedName("Director")
+    val Director: String,
+    @SerializedName("Writer")
+    val Writer: String,
+    @SerializedName("Actors")
+    val Actors: String,
     @SerializedName("Plot")
-    val Plot: String,                      // Сюжет фильма
+    val Plot: String,
+    @SerializedName("Language")
+    val Language: String,
+    @SerializedName("Country")
+    val Country: String,
+    @SerializedName("Awards")
+    val Awards: String,
     @SerializedName("Poster")
     val Poster: String,
     @SerializedName("imdbRating")
-    val imdbRating: String                  // Рейтинг IMDB
+    val imdbRating: String,
+    @SerializedName("imdbID")
+    val imdbID: String,
+    @SerializedName("Type")
+    val Type: String,
+    @SerializedName("DVD")
+    val DVD: String? = null,
+    @SerializedName("BoxOffice")
+    val BoxOffice: String? = null,
+    @SerializedName("Production")
+    val Production: String? = null,
+    @SerializedName("Website")
+    val Website: String? = null
 )

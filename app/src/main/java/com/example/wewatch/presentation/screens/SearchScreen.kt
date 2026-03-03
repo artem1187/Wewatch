@@ -1,5 +1,6 @@
 package com.example.wewatch.presentation.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,9 +28,12 @@ fun SearchScreen(
 ) {
     val searchResults by searchViewModel.searchResults.collectAsState()
     val isLoading by searchViewModel.isLoading.collectAsState()
+    val isLoadingDetails by searchViewModel.isLoadingDetails.collectAsState()
     val errorMessage by searchViewModel.errorMessage.collectAsState()
 
-    // Запускаем поиск при заходе на экран
+    // Состояние для выбранного фильма (для показа диалога загрузки)
+    var selectedFilmId by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(query, year) {
         searchViewModel.searchFilms(query, year.takeIf { it.isNotBlank() })
     }
@@ -100,11 +104,34 @@ fun SearchScreen(
                             SearchResultItem(
                                 film = film,
                                 onClick = {
-                                    addViewModel.setSelectedFilm(film)
-                                    onFilmSelected()
+                                    selectedFilmId = film.imdbID
+                                    // Загружаем детали перед добавлением
+                                    searchViewModel.loadFilmDetails(film.imdbID) { detailedFilm ->
+                                        if (detailedFilm != null) {
+                                            addViewModel.setSelectedFilm(detailedFilm)
+                                            onFilmSelected()
+                                        }
+                                        selectedFilmId = null
+                                    }
                                 }
                             )
                         }
+                    }
+                }
+            }
+
+            // Индикатор загрузки деталей
+            if (isLoadingDetails || selectedFilmId != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Загрузка деталей...")
                     }
                 }
             }

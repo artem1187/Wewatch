@@ -10,13 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import com.example.wewatch.data.local.AppDatabase
 import com.example.wewatch.data.repository.FilmRepository
-import com.example.wewatch.presentation.factory.AddViewModelFactory
-import com.example.wewatch.presentation.factory.MainViewModelFactory
-import com.example.wewatch.presentation.factory.SearchViewModelFactory
+import com.example.wewatch.presentation.factory.*
 import com.example.wewatch.presentation.navigation.SetupNavGraph
-import com.example.wewatch.presentation.viewmodel.AddViewModel
-import com.example.wewatch.presentation.viewmodel.MainViewModel
-import com.example.wewatch.presentation.viewmodel.SearchViewModel
+import com.example.wewatch.presentation.viewmodel.*
 import com.example.wewatch.ui.theme.WewatchTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,7 +24,7 @@ class MainActivity : ComponentActivity() {
 
         // Инициализация БД и репозитория
         val database = AppDatabase.getInstance(this)
-        val apiKey = "ваш_ключ_сюда" // Вставьте ваш API ключ
+        val apiKey = "bbf81799"
         filmRepository = FilmRepository(database, apiKey)
 
         // Создание ViewModel
@@ -47,6 +43,11 @@ class MainActivity : ComponentActivity() {
             SearchViewModelFactory(filmRepository)
         )[SearchViewModel::class.java]
 
+        val detailViewModel = ViewModelProvider(
+            this,
+            DetailViewModelFactory(filmRepository)
+        )[DetailViewModel::class.java]
+
         setContent {
             WewatchTheme {
                 Surface(
@@ -56,7 +57,8 @@ class MainActivity : ComponentActivity() {
                     SetupNavGraph(
                         mainViewModel = mainViewModel,
                         addViewModel = addViewModel,
-                        searchViewModel = searchViewModel
+                        searchViewModel = searchViewModel,
+                        detailViewModel = detailViewModel
                     )
                 }
             }

@@ -11,7 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
+import com.example.wewatch.data.local.FilmEntity
+import com.example.wewatch.presentation.components.DeleteConfirmationDialog
 import com.example.wewatch.presentation.components.EmptyState
 import com.example.wewatch.presentation.components.FilmListItem
 import com.example.wewatch.presentation.viewmodel.MainViewModel
@@ -20,10 +21,13 @@ import com.example.wewatch.presentation.viewmodel.MainViewModel
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
-    onAddClick: () -> Unit = {}
+    onAddClick: () -> Unit = {},
+    onFilmClick: (FilmEntity) -> Unit = {}  // НОВЫЙ параметр
 ) {
     val films by viewModel.films.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -31,7 +35,7 @@ fun MainScreen(
                 title = { Text("Мои фильмы") },
                 actions = {
                     if (films.any { it.isSelected }) {
-                        IconButton(onClick = { viewModel.deleteSelectedFilms() }) {
+                        IconButton(onClick = { showDeleteDialog = true }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Удалить выбранные"
@@ -73,11 +77,19 @@ fun MainScreen(
                     items(films) { film ->
                         FilmListItem(
                             film = film,
-                            onCheckChanged = { viewModel.toggleFilmSelection(film) }
+                            onCheckChanged = { viewModel.toggleFilmSelection(film) },
+                            onItemClick = { onFilmClick(film) }  // Передаем клик
                         )
                     }
                 }
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        DeleteConfirmationDialog(
+            onConfirm = { viewModel.deleteSelectedFilms() },
+            onDismiss = { showDeleteDialog = false }
+        )
     }
 }

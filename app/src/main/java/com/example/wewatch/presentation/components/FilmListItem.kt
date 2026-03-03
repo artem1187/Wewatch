@@ -1,5 +1,6 @@
 package com.example.wewatch.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,10 +15,13 @@ import com.example.wewatch.data.local.FilmEntity
 fun FilmListItem(
     film: FilmEntity,
     onCheckChanged: (Boolean) -> Unit,
+    onItemClick: () -> Unit,  // НОВЫЙ параметр
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onItemClick() },  // Добавляем кликабельность
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
