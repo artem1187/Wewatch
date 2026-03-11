@@ -1,4 +1,4 @@
-package com.example.wewatch.presentation.screens
+package com.example.wewatch.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,29 +13,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.wewatch.data.local.FilmEntity
-import com.example.wewatch.presentation.viewmodel.DetailViewModel
+import com.example.wewatch.data.remote.OmdbFilmDetails
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
-    film: FilmEntity,
-    viewModel: DetailViewModel,
+    film: FilmEntity?,  // <-- Теперь может быть null
+    details: OmdbFilmDetails?,
+    isLoading: Boolean,
+    errorMessage: String?,
     onNavigateBack: () -> Unit
 ) {
-    val details by viewModel.filmDetails.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val scrollState = rememberScrollState()
-
-    // Загружаем детали при первом показе, если есть imdbId
-    LaunchedEffect(film) {
-        film.imdbId?.let { imdbId ->
-            viewModel.loadFilmDetails(imdbId)
+    // Если film == null, показываем сообщение об ошибке и кнопку назад
+    if (film == null) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Ошибка") },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Назад"
+                            )
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Фильм не найден",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = onNavigateBack) {
+                        Text("Вернуться")
+                    }
+                }
+            }
         }
+        return
     }
+
+    // Основной контент (film не null)
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
@@ -87,7 +118,6 @@ fun DetailScreen(
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        // Название и год
                         Text(
                             text = film.title,
                             style = MaterialTheme.typography.headlineMedium
@@ -101,7 +131,6 @@ fun DetailScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Жанр (из локальной БД)
                         film.genre?.let {
                             Card(
                                 modifier = Modifier.padding(vertical = 8.dp),
@@ -119,10 +148,8 @@ fun DetailScreen(
 
                         Divider(modifier = Modifier.padding(vertical = 16.dp))
 
-                        // Детали из API
                         if (details != null) {
-                            // Рейтинг IMDB
-                            if (details!!.imdbRating != "N/A") {
+                            if (details.imdbRating != "N/A") {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.padding(vertical = 4.dp)
@@ -134,32 +161,29 @@ fun DetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = "IMDB: ${details!!.imdbRating}",
+                                        text = "IMDB: ${details.imdbRating}",
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                 }
                             }
 
-                            // Режиссер
-                            if (details!!.Director != "N/A") {
+                            if (details.Director != "N/A") {
                                 Text(
-                                    text = "Режиссер: ${details!!.Director}",
+                                    text = "Режиссер: ${details.Director}",
                                     style = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 )
                             }
 
-                            // Актеры
-                            if (details!!.Actors != "N/A") {
+                            if (details.Actors != "N/A") {
                                 Text(
-                                    text = "В ролях: ${details!!.Actors}",
+                                    text = "В ролях: ${details.Actors}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 )
                             }
 
-                            // Сюжет
-                            if (details!!.Plot != "N/A") {
+                            if (details.Plot != "N/A") {
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -169,32 +193,29 @@ fun DetailScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = details!!.Plot,
+                                        text = details.Plot,
                                         modifier = Modifier.padding(16.dp),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
                             }
 
-                            // Длительность
-                            if (details!!.Runtime != "N/A") {
+                            if (details.Runtime != "N/A") {
                                 Text(
-                                    text = "Длительность: ${details!!.Runtime}",
+                                    text = "Длительность: ${details.Runtime}",
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(vertical = 2.dp)
                                 )
                             }
 
-                            // Страна
-                            if (details!!.Country != "N/A") {
+                            if (details.Country != "N/A") {
                                 Text(
-                                    text = "Страна: ${details!!.Country}",
+                                    text = "Страна: ${details.Country}",
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(vertical = 2.dp)
                                 )
                             }
                         } else if (errorMessage != null) {
-                            // Ошибка загрузки
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(
@@ -202,13 +223,12 @@ fun DetailScreen(
                                 )
                             ) {
                                 Text(
-                                    text = errorMessage!!,
+                                    text = errorMessage,
                                     modifier = Modifier.padding(16.dp),
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
                             }
                         } else {
-                            // Нет imdbId или еще не загружено
                             Text(
                                 text = "Дополнительная информация будет загружаться из API",
                                 style = MaterialTheme.typography.bodyMedium,

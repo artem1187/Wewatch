@@ -1,4 +1,4 @@
-package com.example.wewatch.presentation.screens
+package com.example.wewatch.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,18 +15,18 @@ import com.example.wewatch.data.local.FilmEntity
 import com.example.wewatch.presentation.components.DeleteConfirmationDialog
 import com.example.wewatch.presentation.components.EmptyState
 import com.example.wewatch.presentation.components.FilmListItem
-import com.example.wewatch.presentation.viewmodel.MainViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel,
-    onAddClick: () -> Unit = {},
-    onFilmClick: (FilmEntity) -> Unit = {}  // НОВЫЙ параметр
+    films: List<FilmEntity>,
+    isLoading: Boolean,
+    onDeleteSelected: () -> Unit,
+    onToggleSelection: (FilmEntity) -> Unit,
+    onAddClick: () -> Unit,
+    onFilmClick: (FilmEntity) -> Unit
 ) {
-    val films by viewModel.films.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -77,8 +77,8 @@ fun MainScreen(
                     items(films) { film ->
                         FilmListItem(
                             film = film,
-                            onCheckChanged = { viewModel.toggleFilmSelection(film) },
-                            onItemClick = { onFilmClick(film) }  // Передаем клик
+                            onCheckChanged = { onToggleSelection(film) },
+                            onItemClick = { onFilmClick(film) }
                         )
                     }
                 }
@@ -88,7 +88,10 @@ fun MainScreen(
 
     if (showDeleteDialog) {
         DeleteConfirmationDialog(
-            onConfirm = { viewModel.deleteSelectedFilms() },
+            onConfirm = {
+                onDeleteSelected()
+                showDeleteDialog = false
+            },
             onDismiss = { showDeleteDialog = false }
         )
     }

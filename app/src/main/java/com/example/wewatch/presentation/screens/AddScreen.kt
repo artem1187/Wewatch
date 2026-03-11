@@ -1,4 +1,4 @@
-package com.example.wewatch.presentation.screens
+package com.example.wewatch.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,21 +12,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.wewatch.presentation.viewmodel.AddViewModel
+import com.example.wewatch.data.remote.OmdbFilm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
-    viewModel: AddViewModel,
-    onNavigateBack: () -> Unit,
-    onSearchClick: (String, String) -> Unit
+    searchQuery: String,
+    searchYear: String,
+    selectedFilm: OmdbFilm?,
+    onSearchQueryChange: (String) -> Unit,
+    onSearchYearChange: (String) -> Unit,
+    onSearchClick: (String, String) -> Unit,
+    onAddFilm: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
-    val selectedFilm by viewModel.selectedFilm.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val searchYear by viewModel.searchYear.collectAsState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -49,10 +49,9 @@ fun AddScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Поле поиска
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { viewModel.updateSearchQuery(it) },
+                onValueChange = onSearchQueryChange,
                 label = { Text("Название фильма *") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -76,10 +75,9 @@ fun AddScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Поле для года (опционально)
             OutlinedTextField(
                 value = searchYear,
-                onValueChange = { viewModel.updateSearchYear(it) },
+                onValueChange = onSearchYearChange,
                 label = { Text("Год (необязательно)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -88,7 +86,6 @@ fun AddScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Превью выбранного фильма
             if (selectedFilm != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -98,10 +95,9 @@ fun AddScreen(
                         modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Постер
                         AsyncImage(
-                            model = selectedFilm!!.Poster.ifEmpty { "https://via.placeholder.com/200x300?text=No+Poster" },
-                            contentDescription = selectedFilm!!.Title,
+                            model = selectedFilm.Poster,
+                            contentDescription = selectedFilm.Title,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp),
@@ -110,20 +106,17 @@ fun AddScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Название
                         Text(
-                            text = selectedFilm!!.Title,
+                            text = selectedFilm.Title,
                             style = MaterialTheme.typography.titleLarge
                         )
 
-                        // Год
                         Text(
-                            text = selectedFilm!!.Year,
+                            text = selectedFilm.Year,
                             style = MaterialTheme.typography.bodyLarge
                         )
 
-                        // Жанр (если есть)
-                        selectedFilm!!.Genre?.let {
+                        selectedFilm.Genre?.let {
                             Text(
                                 text = it,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -133,12 +126,8 @@ fun AddScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Кнопка добавления
                         Button(
-                            onClick = {
-                                viewModel.addFilmToDatabase()
-                                onNavigateBack()
-                            },
+                            onClick = onAddFilm,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Добавить в список")
@@ -146,7 +135,6 @@ fun AddScreen(
                     }
                 }
             } else {
-                // Инструкция когда фильм не выбран
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

@@ -1,6 +1,5 @@
-package com.example.wewatch.presentation.screens
+package com.example.wewatch.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,32 +10,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.wewatch.presentation.components.SearchResultItem
-import com.example.wewatch.presentation.viewmodel.AddViewModel
-import com.example.wewatch.presentation.viewmodel.SearchViewModel
+import com.example.wewatch.data.remote.OmdbFilm
+import com.example.wewatch.ui.components.SearchResultItem
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    searchViewModel: SearchViewModel,
-    addViewModel: AddViewModel,
-    query: String,
-    year: String,
-    onNavigateBack: () -> Unit,
-    onFilmSelected: () -> Unit
+    searchResults: List<OmdbFilm>,           // Результаты поиска из Activity
+    isSearching: Boolean,                     // Флаг загрузки
+    errorMessage: String?,                     // Сообщение об ошибке
+    onFilmSelected: (OmdbFilm) -> Unit,        // Обработчик выбора фильма
+    onNavigateBack: () -> Unit                  // Назад
 ) {
-    val searchResults by searchViewModel.searchResults.collectAsState()
-    val isLoading by searchViewModel.isLoading.collectAsState()
-    val isLoadingDetails by searchViewModel.isLoadingDetails.collectAsState()
-    val errorMessage by searchViewModel.errorMessage.collectAsState()
-
-    // Состояние для выбранного фильма (для показа диалога загрузки)
-    var selectedFilmId by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(query, year) {
-        searchViewModel.searchFilms(query, year.takeIf { it.isNotBlank() })
-    }
 
     Scaffold(
         topBar = {
@@ -59,12 +46,14 @@ fun SearchScreen(
                 .padding(paddingValues)
         ) {
             when {
-                isLoading -> {
+                // Показываем индикатор загрузки
+                isSearching -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
 
+                // Показываем ошибку
                 errorMessage != null -> {
                     Column(
                         modifier = Modifier
@@ -73,7 +62,7 @@ fun SearchScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = errorMessage!!,
+                            text = errorMessage,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -86,6 +75,7 @@ fun SearchScreen(
                     }
                 }
 
+                // Пустой результат
                 searchResults.isEmpty() -> {
                     Text(
                         text = "Ничего не найдено",
@@ -94,6 +84,7 @@ fun SearchScreen(
                     )
                 }
 
+                // Показываем результаты
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -103,35 +94,9 @@ fun SearchScreen(
                         items(searchResults) { film ->
                             SearchResultItem(
                                 film = film,
-                                onClick = {
-                                    selectedFilmId = film.imdbID
-                                    // Загружаем детали перед добавлением
-                                    searchViewModel.loadFilmDetails(film.imdbID) { detailedFilm ->
-                                        if (detailedFilm != null) {
-                                            addViewModel.setSelectedFilm(detailedFilm)
-                                            onFilmSelected()
-                                        }
-                                        selectedFilmId = null
-                                    }
-                                }
+                                onClick = { onFilmSelected(film) }
                             )
                         }
-                    }
-                }
-            }
-
-            // Индикатор загрузки деталей
-            if (isLoadingDetails || selectedFilmId != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Загрузка деталей...")
                     }
                 }
             }
