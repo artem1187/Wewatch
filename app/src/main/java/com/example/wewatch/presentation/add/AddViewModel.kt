@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddViewModel @Inject constructor(
+class AddViewModel @Inject constructor(  // ← @Inject constructor
     private val addFilmUseCase: AddFilmUseCase,
     private val searchFilmsUseCase: SearchFilmsUseCase
 ) : ViewModel() {
@@ -107,9 +107,5 @@ class AddViewModel @Inject constructor(
                 _effect.send(AddEffect.NavigateToSearch(query, year))
             }
         }
-    }
-
-    fun updateSearchResults(results: List<OmdbFilm>) {
-        // Метод для обновления результатов поиска (если нужно)
     }
 }

@@ -6,16 +6,21 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.wewatch.presentation.add.AddIntent
 import com.example.wewatch.presentation.add.AddScreen
 import com.example.wewatch.presentation.add.AddViewModel
+import com.example.wewatch.presentation.detail.DetailScreen
+import com.example.wewatch.presentation.detail.DetailViewModel
 import com.example.wewatch.presentation.main.MainScreen
 import com.example.wewatch.presentation.main.MainViewModel
+import com.example.wewatch.presentation.search.SearchScreen
+import com.example.wewatch.presentation.search.SearchViewModel
 import com.example.wewatch.ui.theme.WewatchTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -44,11 +49,17 @@ fun WeWatchApp() {
 
     val mainViewModel: MainViewModel = hiltViewModel()
     val addViewModel: AddViewModel = hiltViewModel()
+    val searchViewModel: SearchViewModel = hiltViewModel()
+    val detailViewModel: DetailViewModel = hiltViewModel()
+
+    // Получаем состояние главного экрана
+    val mainState by mainViewModel.state.collectAsState()
 
     NavHost(
         navController = navController,
         startDestination = "main"
     ) {
+        // Главный экран
         composable("main") {
             MainScreen(
                 viewModel = mainViewModel,
@@ -59,6 +70,7 @@ fun WeWatchApp() {
             )
         }
 
+        // Экран добавления
         composable("add") {
             AddScreen(
                 viewModel = addViewModel,
@@ -69,20 +81,42 @@ fun WeWatchApp() {
             )
         }
 
+        // Экран поиска
         composable("search/{query}/{year}") { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
             val year = backStackEntry.arguments?.getString("year") ?: ""
 
-            // SearchScreen будет добавлен позже
-            // Пока заглушка
-            androidx.compose.material3.Text("Search Screen: $query")
+            SearchScreen(
+                viewModel = searchViewModel,
+                query = query,
+                year = year,
+                onNavigateBack = { navController.popBackStack() },
+                onFilmSelected = { film ->
+                    addViewModel.handleIntent(AddIntent.SelectFilm(film))
+                    navController.popBackStack()
+                }
+            )
         }
 
+        // Экран деталей
         composable("detail/{filmId}") { backStackEntry ->
             val filmId = backStackEntry.arguments?.getString("filmId")?.toIntOrNull() ?: 0
 
-            // DetailScreen будет добавлен позже
-            androidx.compose.material3.Text("Detail Screen: $filmId")
+
+            val film = mainState.films.find { it.id == filmId }
+
+            if (film != null) {
+                DetailScreen(
+                    viewModel = detailViewModel,
+                    film = film,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            } else {
+                // Если фильм не найден, возвращаемся назад
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+            }
         }
     }
 }

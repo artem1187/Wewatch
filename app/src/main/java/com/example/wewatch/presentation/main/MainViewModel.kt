@@ -3,11 +3,14 @@ package com.example.wewatch.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wewatch.domain.usecase.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(
+@HiltViewModel
+class MainViewModel @Inject constructor(  // ← Важно: @Inject constructor
     private val getFilmsUseCase: GetFilmsUseCase,
     private val deleteSelectedFilmsUseCase: DeleteSelectedFilmsUseCase,
     private val toggleFilmSelectionUseCase: ToggleFilmSelectionUseCase

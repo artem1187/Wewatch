@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.wewatch.data.remote.OmdbFilm
-import com.example.wewatch.ui.components.SearchResultItem
+import com.example.wewatch.presentation.components.SearchResultItem
 
 
 

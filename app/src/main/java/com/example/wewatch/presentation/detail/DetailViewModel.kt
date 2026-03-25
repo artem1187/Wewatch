@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailViewModel @Inject constructor(
+class DetailViewModel @Inject constructor(  // ← @Inject constructor
     private val getFilmDetailsUseCase: GetFilmDetailsUseCase
 ) : ViewModel() {
 
