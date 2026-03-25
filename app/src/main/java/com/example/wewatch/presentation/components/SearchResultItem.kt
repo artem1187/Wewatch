@@ -1,4 +1,4 @@
-package com.example.wewatch.ui.components
+package com.example.wewatch.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -32,6 +32,7 @@ fun SearchResultItem(
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Постер
             AsyncImage(
                 model = film.Poster.ifEmpty { "https://via.placeholder.com/50x75?text=No+Poster" },
                 contentDescription = film.Title,
@@ -40,6 +41,7 @@ fun SearchResultItem(
                 contentScale = ContentScale.Crop
             )
 
+            // Информация о фильме
             Column(
                 modifier = Modifier
                     .weight(1f)
