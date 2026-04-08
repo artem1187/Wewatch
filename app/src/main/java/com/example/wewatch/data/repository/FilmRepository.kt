@@ -2,41 +2,44 @@ package com.example.wewatch.data.repository
 
 import com.example.wewatch.data.local.AppDatabase
 import com.example.wewatch.data.local.FilmEntity
+import com.example.wewatch.data.mapper.FilmMapper
 import com.example.wewatch.data.remote.OmdbFilm
 import com.example.wewatch.data.remote.OmdbFilmDetails
 import com.example.wewatch.data.remote.RetrofitInstance
+import com.example.wewatch.domain.model.Film
+import com.example.wewatch.domain.repository.FilmRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
-class FilmRepository(
-    private val db: AppDatabase,
+
+class FilmRepositoryImpl(
+    private val database: AppDatabase,
     private val apiKey: String
-) {
+) : FilmRepository {
 
-    // ========== ЛОКАЛЬНЫЕ ОПЕРАЦИИ ==========
+    private val filmDao = database.filmDao()
 
-    fun getAllFilms(): Flow<List<FilmEntity>> = db.filmDao().getAllFilms()
-
-    suspend fun insertFilm(film: FilmEntity) {
-        db.filmDao().insertFilm(film)
+    override fun getAllFilms(): Flow<List<Film>> {
+        return filmDao.getAllFilms().map { entities ->
+            FilmMapper.toDomainList(entities)
+        }
     }
 
-    suspend fun deleteSelectedFilms() {
-        db.filmDao().deleteSelectedFilms()
+    override suspend fun insertFilm(film: Film) {
+        filmDao.insertFilm(FilmMapper.toEntity(film))
     }
 
-    suspend fun updateFilm(film: FilmEntity) {
-        db.filmDao().updateFilm(film)
+    override suspend fun deleteSelectedFilms() {
+        filmDao.deleteSelectedFilms()
     }
 
-    // ========== УДАЛЕННЫЕ ОПЕРАЦИИ ==========
+    override suspend fun updateFilm(film: Film) {
+        filmDao.updateFilm(FilmMapper.toEntity(film))
+    }
 
-    suspend fun searchFilms(query: String, year: String? = null): List<OmdbFilm> {
+    override suspend fun searchFilms(query: String, year: String?): List<OmdbFilm> {
         return try {
-            val response = RetrofitInstance.api.searchFilms(
-                query = query,
-                year = year,
-                apiKey = apiKey
-            )
+            val response = RetrofitInstance.api.searchFilms(query, year, apiKey)
             response.Search ?: emptyList()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -44,36 +47,25 @@ class FilmRepository(
         }
     }
 
-    suspend fun getFilmDetails(imdbId: String): OmdbFilmDetails? {
+    override suspend fun getFilmDetails(imdbId: String): OmdbFilmDetails? {
         return try {
-            RetrofitInstance.api.getFilmDetails(
-                imdbId = imdbId,
-                apiKey = apiKey
-            )
+            RetrofitInstance.api.getFilmDetails(imdbId, apiKey)
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
 
-    /**
-     * НОВЫЙ МЕТОД: Поиск фильма с деталями (получаем жанр)
-     */
-    suspend fun searchFilmWithDetails(query: String, year: String? = null): List<OmdbFilm> {
+    override suspend fun searchFilmWithDetails(query: String, year: String?): List<OmdbFilm> {
         val searchResults = searchFilms(query, year)
-
-        // Для каждого фильма пробуем получить жанр
         val resultsWithGenres = mutableListOf<OmdbFilm>()
 
         for (film in searchResults) {
             try {
                 val details = getFilmDetails(film.imdbID)
-                val filmWithGenre = film.copy(
-                    Genre = details?.Genre ?: "N/A"
-                )
+                val filmWithGenre = film.copy(Genre = details?.Genre ?: "N/A")
                 resultsWithGenres.add(filmWithGenre)
             } catch (e: Exception) {
-                // Если не удалось получить детали, добавляем без жанра
                 resultsWithGenres.add(film)
             }
         }
