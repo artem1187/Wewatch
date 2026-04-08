@@ -105,9 +105,9 @@ fun MainScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(state.films) { film ->
+                        items(state.films) { film ->  // film имеет тип Film (Domain модель)
                             FilmListItem(
-                                film = film.toEntity(),
+                                film = film,  // Компонент должен принимать Domain модель
                                 onCheckChanged = {
                                     viewModel.handleIntent(MainIntent.ToggleSelection(film.id))
                                 },

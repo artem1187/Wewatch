@@ -9,19 +9,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.wewatch.data.local.FilmEntity
+import com.example.wewatch.domain.model.Film  // ← Импорт Domain модели
 
 @Composable
 fun FilmListItem(
-    film: FilmEntity,
+    film: Film,  // ← Теперь принимает Domain модель Film, а не FilmEntity
     onCheckChanged: (Boolean) -> Unit,
-    onItemClick: () -> Unit,  // НОВЫЙ параметр
+    onItemClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onItemClick() },  // Добавляем кликабельность
+            .clickable { onItemClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
