@@ -1,4 +1,4 @@
-package com.example.wewatch.ui.theme
+package com.example.wewatch.theme
 
 import androidx.compose.ui.graphics.Color
 

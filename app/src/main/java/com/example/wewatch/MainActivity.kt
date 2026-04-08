@@ -21,7 +21,7 @@ import com.example.wewatch.presentation.main.MainScreen
 import com.example.wewatch.presentation.main.MainViewModel
 import com.example.wewatch.presentation.search.SearchScreen
 import com.example.wewatch.presentation.search.SearchViewModel
-import com.example.wewatch.ui.theme.WewatchTheme
+import com.example.wewatch.theme.WeWatchTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            WewatchTheme {
+            WeWatchTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -52,14 +52,12 @@ fun WeWatchApp() {
     val searchViewModel: SearchViewModel = hiltViewModel()
     val detailViewModel: DetailViewModel = hiltViewModel()
 
-    // Получаем состояние главного экрана
     val mainState by mainViewModel.state.collectAsState()
 
     NavHost(
         navController = navController,
         startDestination = "main"
     ) {
-        // Главный экран
         composable("main") {
             MainScreen(
                 viewModel = mainViewModel,
@@ -70,7 +68,6 @@ fun WeWatchApp() {
             )
         }
 
-        // Экран добавления
         composable("add") {
             AddScreen(
                 viewModel = addViewModel,
@@ -81,7 +78,6 @@ fun WeWatchApp() {
             )
         }
 
-        // Экран поиска
         composable("search/{query}/{year}") { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
             val year = backStackEntry.arguments?.getString("year") ?: ""
@@ -98,10 +94,8 @@ fun WeWatchApp() {
             )
         }
 
-        // Экран деталей
         composable("detail/{filmId}") { backStackEntry ->
             val filmId = backStackEntry.arguments?.getString("filmId")?.toIntOrNull() ?: 0
-
 
             val film = mainState.films.find { it.id == filmId }
 
@@ -112,7 +106,6 @@ fun WeWatchApp() {
                     onNavigateBack = { navController.popBackStack() }
                 )
             } else {
-                // Если фильм не найден, возвращаемся назад
                 LaunchedEffect(Unit) {
                     navController.popBackStack()
                 }
