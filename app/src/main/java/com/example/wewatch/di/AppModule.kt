@@ -3,8 +3,8 @@ package com.example.wewatch.di
 import android.content.Context
 import com.example.wewatch.BuildConfig
 import com.example.wewatch.data.local.AppDatabase
-import com.example.wewatch.data.repository.FilmRepository
-import com.example.wewatch.domain.usecase.*
+import com.example.wewatch.data.repository.FilmRepositoryImpl
+import com.example.wewatch.domain.repository.FilmRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,42 +28,6 @@ object AppModule {
         database: AppDatabase
     ): FilmRepository {
         val apiKey = BuildConfig.OMDB_API_KEY
-        return FilmRepository(database, apiKey)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetFilmsUseCase(repository: FilmRepository): GetFilmsUseCase {
-        return GetFilmsUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAddFilmUseCase(repository: FilmRepository): AddFilmUseCase {
-        return AddFilmUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideDeleteSelectedFilmsUseCase(repository: FilmRepository): DeleteSelectedFilmsUseCase {
-        return DeleteSelectedFilmsUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideToggleFilmSelectionUseCase(repository: FilmRepository): ToggleFilmSelectionUseCase {
-        return ToggleFilmSelectionUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSearchFilmsUseCase(repository: FilmRepository): SearchFilmsUseCase {
-        return SearchFilmsUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetFilmDetailsUseCase(repository: FilmRepository): GetFilmDetailsUseCase {
-        return GetFilmDetailsUseCase(repository)
+        return FilmRepositoryImpl(database, apiKey)
     }
 }

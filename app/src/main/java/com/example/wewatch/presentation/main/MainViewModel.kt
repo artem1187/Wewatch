@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(  // ← Важно: @Inject constructor
+class MainViewModel @Inject constructor(
     private val getFilmsUseCase: GetFilmsUseCase,
     private val deleteSelectedFilmsUseCase: DeleteSelectedFilmsUseCase,
     private val toggleFilmSelectionUseCase: ToggleFilmSelectionUseCase
