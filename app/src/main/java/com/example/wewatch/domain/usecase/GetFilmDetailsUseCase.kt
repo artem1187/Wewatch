@@ -1,9 +1,10 @@
 package com.example.wewatch.domain.usecase
 
-import com.example.wewatch.data.repository.FilmRepository
 import com.example.wewatch.data.remote.OmdbFilmDetails
+import com.example.wewatch.domain.repository.FilmRepository
+import javax.inject.Inject
 
-class GetFilmDetailsUseCase(
+class GetFilmDetailsUseCase @Inject constructor(
     private val repository: FilmRepository
 ) {
     suspend operator fun invoke(imdbId: String): OmdbFilmDetails? {
